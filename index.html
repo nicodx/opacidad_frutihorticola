@@ -1,149 +1,400 @@
-
-<h2 class="sr-only">Calculadora MVA: Descomposición del spread agroalimentario — margen de opacidad (ε) despejado</h2>
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora MVA: Descomposición del Spread Agroalimentario</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-* { box-sizing: border-box; }
-.r { font-family: var(--font-sans); padding: 1.25rem 0 2rem; }
-.formula-bar { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.75rem 1rem; margin-bottom: 1.5rem; font-size: 14px; color: var(--color-text-secondary); line-height: 1.5; }
-.formula-bar strong { color: var(--color-text-primary); font-weight: 500; }
-.eps-card { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; }
-.eps-top { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-.eps-label { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.06em; }
-.eps-main { font-size: 40px; font-weight: 500; line-height: 1; transition: color 0.25s; }
-.eps-pct { font-size: 16px; color: var(--color-text-secondary); margin-top: 4px; }
-.warn { font-size: 13px; border-radius: var(--border-radius-md); padding: 6px 10px; margin-top: 10px; display: none; }
-.warn-neg { color: var(--color-text-warning); background: var(--color-background-warning); border: 0.5px solid var(--color-border-warning); }
-.warn-high { color: var(--color-text-danger); background: var(--color-background-danger); border: 0.5px solid var(--color-border-danger); }
-.two-col { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 2rem; }
-.sec-label { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 1rem; }
-.sl-group { margin-bottom: 1.25rem; }
-.sl-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px; }
-.sl-name { font-size: 14px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 6px; }
-.sl-val { font-size: 15px; font-weight: 500; color: var(--color-text-primary); min-width: 90px; text-align: right; }
-.sl-sub { font-size: 12px; color: var(--color-text-tertiary); margin-bottom: 4px; }
-.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-.divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 1.25rem 0; }
-.pg-group { background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 0.875rem 1rem; }
-.pg-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px; }
-.pg-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
-.pg-val { font-size: 16px; font-weight: 500; color: var(--color-text-primary); }
-.tbl { width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed; }
-.tbl th { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; text-align: left; padding: 0 0 8px; border-bottom: 0.5px solid var(--color-border-tertiary); }
-.tbl th:nth-child(2), .tbl th:nth-child(3) { text-align: right; }
-.tbl td { padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); font-size: 14px; vertical-align: middle; }
-.tbl td:nth-child(2), .tbl td:nth-child(3) { text-align: right; }
-.tbl tr:last-child td { border-bottom: none; }
-.tbl .eps-row td { font-weight: 500; }
-.chart-wrap { position: relative; width: 100%; height: 230px; margin: 1.25rem 0 0.75rem; }
-.leg { display: flex; flex-wrap: wrap; gap: 8px 14px; }
-.leg-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--color-text-secondary); }
-.leg-sq { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0f1117;
+    --surface:  #1a1d27;
+    --surface2: #22263a;
+    --border:   rgba(255,255,255,0.08);
+    --border2:  rgba(255,255,255,0.14);
+    --text:     #f0f2f8;
+    --muted:    #8b90a7;
+    --hint:     #555b72;
+    --green:    #3B6D11;
+    --amber:    #BA7517;
+    --gray:     #5F5E5A;
+    --purple:   #534AB7;
+    --red:      #A32D2D;
+    --red-bg:   rgba(163,45,45,0.15);
+    --red-bdr:  rgba(163,45,45,0.4);
+    --warn-bg:  rgba(186,117,23,0.15);
+    --warn-bdr: rgba(186,117,23,0.4);
+    --warn-txt: #f0a832;
+    --radius:   8px;
+    --radius-lg:12px;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  body {
+    padding: 2rem 1.5rem 3rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ── HEADER ── */
+  .page-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+  }
+
+  /* ── FORMULA BAR ── */
+  .formula-bar {
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 0.875rem 1.125rem;
+    margin-bottom: 1.75rem;
+    font-size: 18px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .formula-bar strong { color: var(--text); font-weight: 500; }
+
+  /* ── EPSILON CARD ── */
+  .eps-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 1.375rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .eps-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 0.5rem;
+  }
+  .eps-value {
+    font-size: 50px;
+    font-weight: 500;
+    line-height: 1;
+    transition: color 0.25s;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+  }
+  .eps-pct {
+    font-size: 18px;
+    color: var(--muted);
+  }
+  .warn {
+    font-size: 16px;
+    border-radius: var(--radius);
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.875rem;
+    display: none;
+    line-height: 1.4;
+  }
+  .warn-neg  { color: var(--warn-txt); background: var(--warn-bg);  border: 0.5px solid var(--warn-bdr); }
+  .warn-high { color: #e07070;         background: var(--red-bg);   border: 0.5px solid var(--red-bdr);  }
+
+  /* ── LAYOUT ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+    gap: 2.5rem;
+  }
+
+  /* ── SECTION LABELS ── */
+  .sec-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 1rem;
+  }
+
+  /* ── SLIDERS ── */
+  .sl-group { margin-bottom: 1.375rem; }
+  .sl-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 2px;
+  }
+  .sl-name {
+    font-size: 17px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .sl-val {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text);
+    min-width: 90px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .sl-sub {
+    font-size: 14px;
+    color: var(--hint);
+    margin-bottom: 5px;
+  }
+  .dot {
+    display: inline-block;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── RANGE INPUT ── */
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--text);
+    border: 2px solid var(--surface2);
+    cursor: pointer;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--text);
+    border: 2px solid var(--surface2);
+    cursor: pointer;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 0.5px solid var(--border);
+    margin: 1.375rem 0;
+  }
+
+  /* ── PG BOX ── */
+  .pg-box {
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 0.875rem 1rem;
+  }
+  .pg-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 2px;
+  }
+  .pg-name { font-size: 17px; font-weight: 500; color: var(--text); }
+  .pg-val  { font-size: 19px; font-weight: 500; color: var(--text); }
+
+  /* ── TABLE ── */
+  .tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    table-layout: fixed;
+  }
+  .tbl th {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: left;
+    padding: 0 0 9px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .tbl th:nth-child(2),
+  .tbl th:nth-child(3) { text-align: right; }
+  .tbl td {
+    padding: 9px 0;
+    border-bottom: 0.5px solid var(--border);
+    color: var(--text);
+    font-size: 14px;
+    vertical-align: middle;
+  }
+  .tbl td:nth-child(2),
+  .tbl td:nth-child(3) { text-align: right; }
+  .tbl tr:last-child td { border-bottom: none; }
+  .eps-row td { font-weight: 500; }
+  .tbl-dot {
+    display: inline-block;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    margin-right: 7px;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+
+  /* ── CHART ── */
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+    height: 235px;
+    margin: 1.25rem 0 0.875rem;
+  }
+
+  /* ── LEGEND ── */
+  .leg {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+  .leg-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .leg-sq {
+    width: 9px; height: 9px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 680px) {
+    .two-col { grid-template-columns: 1fr; }
+  }
 </style>
+</head>
+<body>
 
-<div class="r">
+<p class="page-title">Modelo MVA — Auditoría de cadena agroalimentaria</p>
 
-  <div class="formula-bar">
-    <strong>ε = P<sub>g</sub> − (P<sub>o</sub> + C<sub>flete</sub> + C<sub>energía/frío</sub> + C<sub>impuestos</sub> + ρ)</strong>
-    &nbsp;·&nbsp; si ε &gt; 25% de P<sub>g</sub>, hay indicio de oligopsonio o falla logística grave
-  </div>
-
-  <div class="eps-card">
-    <div class="eps-top">
-      <div>
-        <div class="eps-label">Margen de opacidad (ε)</div>
-        <div class="eps-main" id="eps-val">$ 300</div>
-        <div class="eps-pct" id="eps-pct">30.0% del precio de góndola</div>
-      </div>
-    </div>
-    <div class="warn warn-neg" id="w-neg"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Los costos superan el precio de góndola. Rentabilidad negativa.</div>
-    <div class="warn warn-high" id="w-high"><i class="ti ti-alert-circle" aria-hidden="true"></i> ε &gt; 25% de P<sub>g</sub>: posible oligopsonio o falla logística grave.</div>
-  </div>
-
-  <div class="two-col">
-
-    <div>
-      <p class="sec-label">Parámetros del modelo</p>
-
-      <div class="sl-group">
-        <div class="sl-head">
-          <span class="sl-name"><span class="dot" style="background:#3B6D11"></span>Precio en origen (P<sub>o</sub>)</span>
-          <span class="sl-val" id="v-po">$ 250</span>
-        </div>
-        <div class="sl-sub">Lo que recibe el productor</div>
-        <input type="range" id="sl-po" min="0" max="1500" step="5" value="250" style="width:100%">
-      </div>
-
-      <div class="sl-group">
-        <div class="sl-head">
-          <span class="sl-name"><span class="dot" style="background:#BA7517"></span>Costo logístico / frío</span>
-          <span class="sl-val" id="v-log">$ 150</span>
-        </div>
-        <div class="sl-sub">Flete, almacenamiento, merma</div>
-        <input type="range" id="sl-log" min="0" max="800" step="5" value="150" style="width:100%">
-      </div>
-
-      <div class="sl-group">
-        <div class="sl-head">
-          <span class="sl-name"><span class="dot" style="background:#5F5E5A"></span>Carga impositiva</span>
-          <span class="sl-val" id="v-imp">$ 200</span>
-        </div>
-        <div class="sl-sub">IVA, ingresos brutos, sellos</div>
-        <input type="range" id="sl-imp" min="0" max="800" step="5" value="200" style="width:100%">
-      </div>
-
-      <div class="sl-group">
-        <div class="sl-head">
-          <span class="sl-name"><span class="dot" style="background:#534AB7"></span>Costo financiero (ρ)</span>
-          <span class="sl-val" id="v-fin">$ 100</span>
-        </div>
-        <div class="sl-sub">Tasa MAV / riesgo de capital</div>
-        <input type="range" id="sl-fin" min="0" max="500" step="5" value="100" style="width:100%">
-      </div>
-
-      <hr class="divider">
-
-      <div class="pg-group">
-        <div class="pg-head">
-          <span class="pg-name">Precio de góndola (P<sub>g</sub>)</span>
-          <span class="pg-val" id="v-pg">$ 1.000</span>
-        </div>
-        <div class="sl-sub" style="margin-bottom:6px">Precio final al consumidor</div>
-        <input type="range" id="sl-pg" min="0" max="3000" step="10" value="1000" style="width:100%">
-      </div>
-    </div>
-
-    <div>
-      <p class="sec-label">Descomposición de P<sub>g</sub></p>
-
-      <table class="tbl" aria-label="Descomposición de componentes del precio de góndola">
-        <thead>
-          <tr>
-            <th style="width:52%">Componente</th>
-            <th style="width:26%">Monto</th>
-            <th style="width:22%">% P<sub>g</sub></th>
-          </tr>
-        </thead>
-        <tbody id="tbl-body"></tbody>
-      </table>
-
-      <div class="chart-wrap">
-        <canvas id="donut" role="img" aria-label="Gráfico de dona con la composición del precio de góndola por componente">Composición del precio de góndola agroalimentario.</canvas>
-      </div>
-
-      <div class="leg" id="legend"></div>
-    </div>
-
-  </div>
+<div class="formula-bar">
+  <strong>ε = P<sub>g</sub> − (P<sub>o</sub> + C<sub>flete</sub> + C<sub>energía</sub> + C<sub>impuestos</sub> + ρ)</strong>
+  &nbsp;·&nbsp; si ε &gt; 25–30% de P<sub>g</sub>, hay indicio de oligopsonio o falla logística
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<div class="two-col">
+
+  <!-- COL IZQUIERDA: sliders -->
+  <div>
+    <p class="sec-label">Parámetros del modelo</p>
+
+    <div class="sl-group">
+      <div class="sl-head">
+        <span class="sl-name"><span class="dot" style="background:#3B6D11"></span>Precio en origen (P<sub>o</sub>)</span>
+        <span class="sl-val" id="v-po">$ 250</span>
+      </div>
+      <div class="sl-sub">Lo que recibe el productor</div>
+      <input type="range" id="sl-po" min="0" max="1500" step="5" value="250">
+    </div>
+
+    <div class="sl-group">
+      <div class="sl-head">
+        <span class="sl-name"><span class="dot" style="background:#BA7517"></span>Costo logístico / frío</span>
+        <span class="sl-val" id="v-log">$ 150</span>
+      </div>
+      <div class="sl-sub">Flete, almacenamiento, merma</div>
+      <input type="range" id="sl-log" min="0" max="800" step="5" value="150">
+    </div>
+
+    <div class="sl-group">
+      <div class="sl-head">
+        <span class="sl-name"><span class="dot" style="background:#5F5E5A"></span>Carga impositiva consolidada</span>
+        <span class="sl-val" id="v-imp">$ 200</span>
+      </div>
+      <div class="sl-sub">IVA, ingresos brutos, sellos</div>
+      <input type="range" id="sl-imp" min="0" max="800" step="5" value="200">
+    </div>
+
+    <div class="sl-group">
+      <div class="sl-head">
+        <span class="sl-name"><span class="dot" style="background:#534AB7"></span>Costo financiero (ρ)</span>
+        <span class="sl-val" id="v-fin">$ 100</span>
+      </div>
+      <div class="sl-sub">Tasa MAV / riesgo de capital</div>
+      <input type="range" id="sl-fin" min="0" max="500" step="5" value="100">
+    </div>
+
+    <hr class="divider">
+
+    <div class="pg-box">
+      <div class="pg-head">
+        <span class="pg-name">Precio de góndola (P<sub>g</sub>)</span>
+        <span class="pg-val" id="v-pg">$ 1.000</span>
+      </div>
+      <div class="sl-sub" style="margin-bottom:8px">Precio final al consumidor</div>
+      <input type="range" id="sl-pg" min="0" max="3000" step="10" value="1000">
+    </div>
+  </div>
+
+  <!-- COL DERECHA: resultados -->
+  <div>
+    <p class="sec-label">Margen de opacidad (ε)</p>
+
+    <div class="eps-card">
+      <div class="eps-label">ε — Margen de opacidad / especulación</div>
+      <div class="eps-value" id="eps-val">$ 300</div>
+      <div class="eps-pct" id="eps-pct">30.0% del precio de góndola</div>
+      <div class="warn warn-neg"  id="w-neg">⚠ Los costos superan el precio de góndola. Rentabilidad negativa.</div>
+      <div class="warn warn-high" id="w-high">⊘ ε &gt; 25% del P<sub>g</sub>: indicio de oligopsonio o falla logística grave.</div>
+    </div>
+
+    <p class="sec-label">Descomposición de P<sub>g</sub></p>
+
+    <table class="tbl" aria-label="Descomposición de componentes del precio de góndola">
+      <thead>
+        <tr>
+          <th style="width:52%">Componente</th>
+          <th style="width:26%">Monto</th>
+          <th style="width:22%">% P<sub>g</sub></th>
+        </tr>
+      </thead>
+      <tbody id="tbl-body"></tbody>
+    </table>
+
+    <div class="chart-wrap">
+      <canvas id="donut" role="img" aria-label="Composición del precio de góndola por componente">
+        Gráfico de dona con la composición del precio de góndola agroalimentario.
+      </canvas>
+    </div>
+
+    <div class="leg" id="legend"></div>
+  </div>
+
+</div>
+
 <script>
 const COMP = [
-  { key:'po',  label:'Precio origen (Po)',      color:'#3B6D11', slId:'sl-po',  vId:'v-po'  },
-  { key:'log', label:'Logística / frío',         color:'#BA7517', slId:'sl-log', vId:'v-log' },
-  { key:'imp', label:'Carga impositiva',         color:'#5F5E5A', slId:'sl-imp', vId:'v-imp' },
-  { key:'fin', label:'Costo financiero (ρ)',     color:'#534AB7', slId:'sl-fin', vId:'v-fin' },
-  { key:'eps', label:'Margen de opacidad (ε)',   color:'#A32D2D', slId:null,     vId:null    },
+  { label:'Precio origen (Po)',      color:'#3B6D11', slId:'sl-po',  vId:'v-po'  },
+  { label:'Logística / frío',        color:'#BA7517', slId:'sl-log', vId:'v-log' },
+  { label:'Carga impositiva',        color:'#5F5E5A', slId:'sl-imp', vId:'v-imp' },
+  { label:'Costo financiero (ρ)',    color:'#534AB7', slId:'sl-fin', vId:'v-fin' },
+  { label:'Margen opacidad (ε)',     color:'#A32D2D', slId:null,     vId:null    },
+];
+const LABELS_LONG = [
+  'Precio origen (P\u2092)',
+  'Log\xedstica / fr\xedo',
+  'Carga impositiva',
+  'Costo financiero (\u03c1)',
+  'Margen opacidad (\u03b5)',
 ];
 
 let chart = null;
@@ -177,8 +428,10 @@ function update() {
   document.getElementById('w-high').style.display = isHigh ? 'block' : 'none';
 
   epsEl.textContent = fmt(eps);
-  epsEl.style.color = isNeg ? 'var(--color-text-warning)' : isHigh ? '#A32D2D' : 'var(--color-text-primary)';
-  epsPct.textContent = pg > 0 ? ((eps / pg) * 100).toFixed(1) + '% del precio de góndola' : '—';
+  epsEl.style.color = isNeg ? '#f0a832' : isHigh ? '#e07070' : '#f0f2f8';
+  epsPct.textContent = pg > 0
+    ? ((eps / pg) * 100).toFixed(1) + '% del precio de góndola'
+    : '—';
 
   const epsChart = Math.max(0, eps);
   const vals = [po, log, imp, fin, epsChart];
@@ -189,7 +442,6 @@ function update() {
 }
 
 function renderTable(vals, pg, rawEps) {
-  const labels = ['Precio origen (P\u2092)', 'Log\xedstica / fr\xedo', 'Carga impositiva', 'Costo financiero (\u03c1)', 'Margen de opacidad (\u03b5)'];
   const tbody = document.getElementById('tbl-body');
   tbody.innerHTML = '';
   vals.forEach((v, i) => {
@@ -198,10 +450,12 @@ function renderTable(vals, pg, rawEps) {
     const isEps = i === 4;
     const tr = document.createElement('tr');
     if (isEps) tr.className = 'eps-row';
-    const dotColor = COMP[i].color;
-    const pctColor = isEps ? (rawEps < 0 ? 'var(--color-text-warning)' : rawEps / pg > 0.25 ? '#A32D2D' : 'var(--color-text-secondary)') : 'var(--color-text-secondary)';
+    const col   = COMP[i].color;
+    const pctColor = isEps
+      ? (rawEps < 0 ? '#f0a832' : rawEps / pg > 0.25 ? '#e07070' : '#8b90a7')
+      : '#8b90a7';
     tr.innerHTML =
-      '<td><span class="dot" style="background:' + dotColor + ';margin-right:6px"></span>' + labels[i] + '</td>' +
+      '<td><span class="tbl-dot" style="background:' + col + '"></span>' + LABELS_LONG[i] + '</td>' +
       '<td>' + fmt(displayVal) + '</td>' +
       '<td style="color:' + pctColor + '">' + pct + '%</td>';
     tbody.appendChild(tr);
@@ -215,7 +469,9 @@ function renderLegend(vals, pg) {
     const pct = pg > 0 ? ((vals[i] / pg) * 100).toFixed(1) : '0.0';
     const el = document.createElement('span');
     el.className = 'leg-item';
-    el.innerHTML = '<span class="leg-sq" style="background:' + c.color + '"></span>' + c.label + ' ' + pct + '%';
+    el.innerHTML =
+      '<span class="leg-sq" style="background:' + c.color + '"></span>' +
+      c.label + ': ' + pct + '%';
     box.appendChild(el);
   });
 }
@@ -233,7 +489,12 @@ function renderChart(vals) {
     type: 'doughnut',
     data: {
       labels: labels,
-      datasets: [{ data: vals, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }]
+      datasets: [{
+        data: vals,
+        backgroundColor: colors,
+        borderWidth: 0,
+        hoverOffset: 6,
+      }]
     },
     options: {
       responsive: true,
@@ -258,3 +519,5 @@ function renderChart(vals) {
 document.querySelectorAll('input[type=range]').forEach(el => el.addEventListener('input', update));
 update();
 </script>
+</body>
+</html>
